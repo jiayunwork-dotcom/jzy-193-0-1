@@ -1,0 +1,20 @@
+# 叠加在 docker-compose.yml 之上的测试配置：
+# 用独立的 test_abm 库在一次性容器里跑 pytest（跑完即退出）。
+# 用法：./scripts/run_pg_tests.sh
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["sh", "/scripts/run_tests.sh"]
+    working_dir: /app
+    environment:
+      TEST_DATABASE_URL: postgresql+psycopg2://abm:abm@db:5432/test_abm
+      CREATE_TABLES: "0"
+    volumes:
+      - ./backend/tests:/app/tests
+      - ./scripts:/scripts
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["test"]
